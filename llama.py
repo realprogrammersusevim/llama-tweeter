@@ -4,7 +4,7 @@ import sys
 from llama_cpp import Llama
 
 
-def summarize_text(text):
+def summarize_text(text, model_path):
     # Save a copy of the current file descriptors for stdout and stderr
     stdout_fd = os.dup(1)
     stderr_fd = os.dup(2)
@@ -25,7 +25,7 @@ def summarize_text(text):
     try:
         # Load the LLM once and then reuse it for multiple queries instead of reloading
         llm = Llama(
-            model_path="/Volumes/Storage/git/llama.cpp/models/llama-2-13b-chat/ggml_q5.bin",
+            model_path=model_path,
             verbose=False,
             use_mlock=True,
             n_ctx=1000,

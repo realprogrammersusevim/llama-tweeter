@@ -12,6 +12,7 @@ consumer_key = os.environ.get("CONSUMER_KEY")
 consumer_secret = os.environ.get("CONSUMER_SECRET")
 access_token = os.environ.get("ACCESS_TOKEN")
 access_token_secret = os.environ.get("ACCESS_TOKEN_SECRET")
+model_path = os.environ.get("LLAMA_PATH")
 
 # Check that all the keys are accounted for
 if (
@@ -27,7 +28,7 @@ with open("save.txt", "rb") as f:
 
 descriptions = [i["description"] for i in news]
 print(descriptions)
-summary = llama.summarize_text("\n".join(descriptions))
+summary = llama.summarize_text("\n".join(descriptions), model_path)
 
 tweet = {"text": summary["choices"][0]["text"]}
 
