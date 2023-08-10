@@ -2,6 +2,8 @@ import os
 
 from dotenv import load_dotenv
 
+import llama
+import rss
 import twitter
 
 # Load all our keys
@@ -18,16 +20,23 @@ if (
     or not access_token
     or not access_token_secret
 ):
-    raise Exception("Could not find keys")
+    raise ValueError("Could not find keys")
 
-tweet = {
-    "text": 'Did you know the "Hello World!" example programmed was first used in the book "The C Programming Language"?'
-}
+with open("save.txt", "rb") as f:
+    news = rss.past_day(rss.parse_xml(f))
 
-resp = twitter.post_tweet(
-    payload=tweet,
-    consumer_key=consumer_key,
-    consumer_secret=consumer_secret,
-    access_token=access_token,
-    access_token_secret=access_token_secret,
-)
+descriptions = [i["description"] for i in news]
+print(descriptions)
+summary = llama.summarize_text("\n".join(descriptions))
+
+tweet = {"text": summary["choices"][0]["text"]}
+
+print(tweet)
+
+# resp = twitter.post_tweet(
+#     payload=tweet,
+#     consumer_key=consumer_key,
+#     consumer_secret=consumer_secret,
+#     access_token=access_token,
+#     access_token_secret=access_token_secret,
+# )
