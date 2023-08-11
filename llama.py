@@ -23,7 +23,6 @@ def summarize_text(text, model_path):
     sys.stderr = os.fdopen(stderr_fd, "w")
 
     try:
-        # Load the LLM once and then reuse it for multiple queries instead of reloading
         llm = Llama(
             model_path=model_path,
             verbose=False,
@@ -46,9 +45,71 @@ def summarize_text(text, model_path):
         sys.stdout = original_stdout
         sys.stderr = original_stderr
 
-    # TODO: Check character limit and do some error correction
-    return llm(
-        text
-        + "\n[INST]Respond with only the text of a tweet summarizing the the most interesting news story above in 280 characters.[/INST]\n",
-        max_tokens=280,
+    stories = _create_worker(
+        llm,
+        text,
+        "You are a seasoned journalist who knows exactly what people find interesting and responds quickly and concisely.",
+        "Respond with only the full description of the three most important and interesting news stories above and include the name of the source.",
     )
+    tweet = _create_worker(
+        llm,
+        stories,
+        "You are an experienced tweet writer.",
+        "Create a short tweet summarizing all of the news stories above. \
+This will help people by keeping them informed. \
+Stay factual and informative. \
+Don't use hashtags. \
+Respond with only the text of the tweet.",
+        True,
+    )
+    edited = _create_worker(
+        llm,
+        tweet,
+        "You are an eagle-eyed tweet editor.",
+"Edit the tweet above to remove any weird formatting and ensure sentences are used. \
+Don't include hashtags. \
+Respond only with the text of the tweet.",
+    )
+
+    while len(edited) > 280:
+        print(len(edited))
+        edited = _create_worker(
+            llm,
+            edited,
+            "You are an eagle-eyed tweet editor and formatter.",
+            f"The tweet above is {len(edited) - 280} characters too long. \
+Shorten the tweet to keep it under the 280 character limit while preserving all the news stories. \
+Abbreviate wherever possible. \
+Don't include anything like '(320 characters)' or hashtags. \
+Respond with only the text of the tweet.",
+        )
+
+    return edited
+
+
+def _create_worker(
+    llm: Llama, info: str, sys_prompt: str, instruction: str, verbose: bool = True
+) -> str:
+    prompt = f"""\
+{info}
+
+<s>[INST] <<SYS>>
+{sys_prompt}
+<</SYS>>
+
+{instruction}
+[/INST]\n\n"""
+    if verbose:
+        print(prompt)
+    stream = llm(prompt=prompt, max_tokens=300, stream=True)
+
+    output = ""
+    for i in stream:
+        i_text = i["choices"][0]["text"]
+        if verbose:
+            print(i_text, end="", flush=True)
+        output += i_text
+    if verbose:
+        print()
+
+    return output
