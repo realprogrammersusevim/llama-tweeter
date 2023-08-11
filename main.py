@@ -1,4 +1,5 @@
 import os
+import random
 
 from dotenv import load_dotenv
 
@@ -23,21 +24,29 @@ if (
 ):
     raise ValueError("Could not find keys")
 
-with open("save.txt", "rb") as f:
-    news = rss.past_day(rss.parse_xml(f))
+# twitter.get_oath(consumer_key, consumer_secret)
+# input()
 
-descriptions = [i["description"] for i in news]
-print(descriptions)
+# with open("save.txt", "rb") as f:
+#     news = rss.parse_xml(f, "Fox News")
+
+feeds = rss.get_feeds()
+news = []
+
+for i in feeds:
+    news.extend(rss.past_day(rss.parse_xml(i["text"], i["name"])))
+
+descriptions = [f'{i["description"]} (Source: {i["source"]})' for i in news]
+random.shuffle(descriptions)
+descriptions = descriptions[0:10]
 summary = llama.summarize_text("\n".join(descriptions), model_path)
 
-tweet = {"text": summary["choices"][0]["text"]}
+tweet = {"text": summary}
 
-print(tweet)
-
-# resp = twitter.post_tweet(
-#     payload=tweet,
-#     consumer_key=consumer_key,
-#     consumer_secret=consumer_secret,
-#     access_token=access_token,
-#     access_token_secret=access_token_secret,
-# )
+resp = twitter.post_tweet(
+    payload=tweet,
+    consumer_key=consumer_key,
+    consumer_secret=consumer_secret,
+    access_token=access_token,
+    access_token_secret=access_token_secret,
+)

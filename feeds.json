@@ -1,8 +1,20 @@
 {
   "world_news": [
-    "https://moxie.foxnews.com/google-publisher/world.xml",
-    "http://rss.cnn.com/rss/edition_world.rss",
-    "https://www.latimes.com/world-nation/rss2.0.xml#nt=1col-7030col1",
-    "https://abcnews.go.com/abcnews/internationalheadlines"
+    {
+      "url": "https://moxie.foxnews.com/google-publisher/world.xml",
+      "name": "Fox News"
+    },
+    {
+      "url": "http://rss.cnn.com/rss/edition_world.rss",
+      "name": "CNN"
+    },
+    {
+      "url": "https://www.latimes.com/world-nation/rss2.0.xml#nt=1col-7030col1",
+      "name": "LA Times"
+    },
+    {
+      "url": "https://abcnews.go.com/abcnews/internationalheadlines",
+      "name": "ABC"
+    }
   ]
 }
