@@ -19,5 +19,5 @@ six==1.16.0
 soupsieve==2.4.1
 typing_extensions==4.7.1
 tzlocal==5.0.1
-urllib3==2.6.0
+urllib3==2.6.3
 xmltodict==0.13.0
